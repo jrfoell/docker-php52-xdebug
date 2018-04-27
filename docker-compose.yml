@@ -1,0 +1,36 @@
+version: "2"
+
+services:
+  nginx:
+    depends_on:
+      - php
+    image: tommylau/nginx
+    ports:
+      - '80:80'
+    volumes_from:
+      - php
+    restart: on-failure
+
+  mysql:
+    image: mysql:5.5
+    volumes:
+      - ./mysql:/var/lib/mysql   
+    ports:
+      - '3307:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: mysecretpassword
+    restart: on-failure
+
+  php:
+    image: lucatume/php-52-xdebug
+    depends_on:
+      - mysql
+    volumes:
+      - ./public_html:/var/www/html
+    restart: on-failure
+    expose:
+      - '9001'
+    environment:
+      # see https://github.com/lucatume/dockerfiles/blob/master/images-build/php-52-xdebug/entrypoint
+      XDEBUG_REMOTE_HOST: "10.254.254.254"
+      XDEBUG_REMOTE_PORT: "9001"
